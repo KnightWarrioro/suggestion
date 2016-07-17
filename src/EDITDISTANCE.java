@@ -28,9 +28,9 @@ public class EDITDISTANCE {
 	    		}
 	    		else
 	    		{
-	    			arr[i][j]=arr[i-1][j-1]+1;
+	    			arr[i][j]=Math.min(arr[i-1][j]+1,Math.min(arr[i][j-1]+1,arr[i-1][j-1]+1));
 	    		}
-	    		arr[i][j]=Math.min(arr[i-1][j]+1,Math.min(arr[i][j-1]+1,arr[i][j]));
+	    		
 	    	}
 	    }
 	    

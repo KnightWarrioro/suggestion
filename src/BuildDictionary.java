@@ -1,15 +1,13 @@
 	import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
-public class BUILDDICTIONARY {
+public class BuildDictionary{
 	
 	/*private boolean isWord;
 	private BUILDDICTIONARY children[]=new BUILDDICTIONARY[256];
@@ -33,31 +31,20 @@ public class BUILDDICTIONARY {
 		}
 	}*/
 	
-	private Set<String> dictionary=new HashSet<String>();
-	private Map <Integer,List<String> >hm=new HashMap<Integer,List<String>>();
-	
-	
-	void printSet()
-	{
-		for(String s:dictionary)
-		{
-			System.out.println(s+" ");
-		}
-	}
+
 	void printHashMap()
 	{
-		for (Integer key: hm.keySet()) {
-
-		    System.out.println("key : " + key);
-		    List l = hm.get(key);
-		    for(int k = 0; k < l.size(); k++){
-	           
-	            System.out.println(l.get(k));
-		    }
-		    
+		for(Integer key:hm.keySet())
+		{
+			System.out.println("The key is" + key);
+			for(String inter:hm.get(key).keySet())
+			{
+				System.out.println(inter+" : "+hm.get(key).get(inter));
+			}
 		}
-		
 	}
+	private Map <Integer,Map<String,Integer> >hm=new HashMap<Integer,Map<String,Integer>>();
+	
 	void getInput(String path) throws IOException
 	{
 		FileReader fr=new FileReader(path);
@@ -84,33 +71,43 @@ public class BUILDDICTIONARY {
 					break;
 				right_index--;
 			}
+			//System.out.println("Here in input");
 			//System.out.println(left_index+" "+right_index);
 			if(left_index<right_index)
 			{
 				String s=input.subSequence(left_index, right_index+1).toString();
+				s.toLowerCase();
+				//System.out.println("Here in input");
+				int len=s.length();
+				if(hm.containsKey(len))
+				{
+					//System.out.println("Old values");
+					Map<String,Integer> m=hm.get(len);
+					if(m.containsKey(s)==true)
+					{
+						//System.out.println("value of m.get(s) "+m.get(s));
+						m.put(s,hm.get(len).get(s)+1);
+						hm.put( len,m);
+					}
+					else
+					{
+					
+						m.put(s,1);
+						//System.out.println("value of m.get(s) "+m.get(s));
+						hm.put( len,m);
+					}
+				}
+				else
+				{
+					Map<String,Integer> m=new HashMap<String,Integer>();
+					//System.out.println("New Value detected");
+					m.put(s,1);
+					hm.put( len,m);
+				}
 				//System.out.println("String formulated is "+s );
-				dictionary.add(s);
 			}
 		}
 		
-	}
-	void buildHashMap()
-	{
-		for(String s:dictionary)
-		{
-			int len=s.length();
-			if(hm.containsKey(len))
-			{
-				hm.get(len).add(s);
-			}
-			else
-			{
-				List<String> list=new ArrayList();
-				list.add(s);
-				hm.put(len, list);
-			}
-			
-		}
 	}
 	
 	String getRecommendation(String word)
@@ -119,35 +116,42 @@ public class BUILDDICTIONARY {
 		int minyet=Integer.MAX_VALUE;
 		int val;
 		EDITDISTANCE edobj=new EDITDISTANCE();
-		for (Integer key: hm.keySet()) {
-
-		    //System.out.println("key : " + key);
-		    List l = hm.get(key);
-		    if(key>=(word.length()-2)&&key<=(word.length()+2))
-		    {
-			    for(int k = 0; k < l.size(); k++){
-		           
-		            val=edobj.editDist(word, (String)l.get(k));
-		            if(val<minyet)
-		            {
-		            	minyet=val;
-		            	suggestion=(String)l.get(k);
-		            }
-			    }
-		    }
-		    
+		List<Frequency> arrs=new ArrayList<Frequency>() ;
+		for(Integer key:hm.keySet())
+		{
+			
+			if((key>=word.length()-4)&&(key<=word.length()+2))
+			for(String internal:hm.get(key).keySet())
+			{
+				val=edobj.editDist(word, internal);
+				if(val<minyet)
+				{
+					arrs=new ArrayList<Frequency>() ;
+					arrs.add(new Frequency(hm.get(key).get(internal),internal));
+					minyet=val;
+				}
+				else if(val==minyet)
+				{
+					arrs.add(new Frequency(hm.get(key).get(internal),internal));
+				}
+			}
+			
+			
 		}
-		return suggestion;
+		Collections.sort(arrs);
+		
+		return arrs.get(0).getValue();
 		
 	}
 	/*public static void main(String Args[]) throws IOException
 	{
-		BUILDDICTIONARY d=new BUILDDICTIONARY();
+		BuildDictionary d=new BuildDictionary();
 		d.getInput("sample.in");
-		d.printSet();
-		d.buildHashSet();
+		//d.printSet();
+		//d.buildHashSet();
 		d.printHashMap();
 	}
 	*/
+	
 	
 }
